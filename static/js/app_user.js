@@ -1,9 +1,4 @@
-// ========================================
-// APP_USER.JS - MÓDULO DE USUARIOS
-// Sistema de gestión de usuarios con AngularJS
-// ========================================
 
-// Función para marcar opción activa en el menú
 function activeMenuOption(href) {
     try {
         $(".app-menu .nav-link").removeClass("active").removeAttr('aria-current')
@@ -11,29 +6,31 @@ function activeMenuOption(href) {
     } catch (e) { /* silencio */ }
 }
 
+
 const app = angular.module("angularjsApp", ["ngRoute"])
 
-// ========================================
-// CONFIGURACIÓN DE RUTAS
-// ========================================
+
 app.config(function ($routeProvider, $locationProvider) {
     $locationProvider.hashPrefix("")
 
     $routeProvider
-
-    .when("/login", {
-        templateUrl: "/login",
-        controller: "loginCtrl"
-    })
-        
     .when("/", {
         templateUrl: "/dashboard",
         controller: "dashboardCtrl"
     })
-  
+    .when("/login", {
+        templateUrl: "/login",
+        controller: "loginCtrl"
+    })
     .when("/users", {
         templateUrl: "/users",
         controller: "usersCtrl"
+    })
+    
+ 
+    .when('/roles', {
+        templateUrl: '/roles', 
+        controller: 'rolesCtrl' 
     })
     .otherwise({
         redirectTo: "/"
@@ -69,7 +66,8 @@ app.run(["$rootScope", "$http", "$location", function($rootScope, $http, $locati
 
     // Cerrar sesión
     $rootScope.logout = function() {
-        if (!confirm('¿Estás seguro de cerrar sesión?')) {
+        // [IMPORTANTE]: Reemplazar 'confirm' por un modal personalizado.
+        if (!window.confirm('¿Estás seguro de cerrar sesión?')) {
             return
         }
 
@@ -106,6 +104,7 @@ app.run(["$rootScope", "$http", "$location", function($rootScope, $http, $locati
     // Cargar usuario actual al iniciar
     $rootScope.getCurrentUser()
 }])
+
 
 // ========================================
 // CONTROLLER: LOGIN
@@ -177,6 +176,7 @@ app.controller("loginCtrl", function ($scope, $http, $rootScope, $location) {
 // CONTROLLER: GESTIÓN DE USUARIOS
 // ========================================
 app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
+    // Inicialización de variables de estado
     $scope.users = []
     $scope.loading = true
     $scope.saving = false
@@ -330,7 +330,8 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     // ELIMINAR USUARIO
     // ========================================
     $scope.confirmDelete = function(user) {
-        if (confirm(`¿Estás seguro de eliminar al usuario "${user.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+        // [IMPORTANTE]: Reemplazar 'confirm' por un modal personalizado.
+        if (window.confirm(`¿Estás seguro de eliminar al usuario "${user.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
             $http.delete(`/api/users/${user.id}`, { withCredentials: true })
             .then(function(response) {
                 if (response.data.success) {
@@ -351,7 +352,8 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     // ========================================
     $scope.toggleUserStatus = function(user) {
         const accion = user.activo ? 'desactivar' : 'activar'
-        if (!confirm(`¿Estás seguro de ${accion} a "${user.nombre}"?`)) {
+        // [IMPORTANTE]: Reemplazar 'confirm' por un modal personalizado.
+        if (!window.confirm(`¿Estás seguro de ${accion} a "${user.nombre}"?`)) {
             return
         }
 
@@ -373,7 +375,8 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     // DESBLOQUEAR USUARIO
     // ========================================
     $scope.unlockUser = function(user) {
-        if (!confirm(`¿Desbloquear al usuario "${user.nombre}"?`)) {
+        // [IMPORTANTE]: Reemplazar 'confirm' por un modal personalizado.
+        if (!window.confirm(`¿Desbloquear al usuario "${user.nombre}"?"`)) {
             return
         }
 
@@ -392,7 +395,7 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     }
 
     // ========================================
-    // BÚSQUEDA CON DEBOUNCE
+    // BÚSQUEDA Y FILTROS
     // ========================================
     let searchTimeout
     $scope.$watch('searchText', function(newVal, oldVal) {
@@ -400,13 +403,10 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
             if (searchTimeout) $timeout.cancel(searchTimeout)
             searchTimeout = $timeout(function() {
                 loadUsers(false)
-            }, 500) // Esperar 500ms después de que el usuario deje de escribir
+            }, 500)
         }
     })
 
-    // ========================================
-    // FILTROS
-    // ========================================
     $scope.applyFilters = function() {
         loadUsers(false)
     }
@@ -419,7 +419,7 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     }
 
     // ========================================
-    // HELPER: BADGE DE ROL
+    // HELPER: BADGE DE ROL Y ESTADO
     // ========================================
     $scope.getRolBadge = function(rol_id) {
         switch(parseInt(rol_id)) {
@@ -429,9 +429,6 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
         }
     }
 
-    // ========================================
-    // HELPER: BADGE DE ESTADO
-    // ========================================
     $scope.getEstadoBadge = function(activo) {
         return activo 
             ? { text: 'Activo', class: 'bg-success' }
@@ -444,6 +441,227 @@ app.controller("usersCtrl", function ($scope, $http, $rootScope, $timeout) {
     initModal()
     loadUsers()
     activeMenuOption("#/users")
+})
+
+// ========================================
+// CONTROLLER: GESTIÓN DE ROLES
+// ========================================
+app.controller("rolesCtrl", function ($scope, $http, $rootScope, $timeout) {
+    $scope.roles = []
+    $scope.loading = true
+    $scope.saving = false
+    $scope.editingRole = null
+    // Nuevo estado para la eliminación
+    $scope.deletingRole = null 
+    $scope.formRole = {
+        nombre: '',
+        descripcion: ''
+    }
+    // Mensajes de estado para el formulario de rol de creación
+    $scope.successMessage = null
+    $scope.errorMessage = null
+    $scope.isLoading = false // Usado para el botón de "Crear Rol"
+    
+    let roleModal = null
+    let deleteModal = null // Nuevo modal para confirmación de borrado
+    
+    // Función para limpiar mensajes
+    function clearMessages() {
+        $scope.successMessage = null
+        $scope.errorMessage = null
+    }
+
+    // ========================================
+    // CARGAR ROLES (GET /api/roles)
+    // ========================================
+    function loadRoles(showLoading = true) {
+        if (showLoading) $scope.loading = true
+        
+        $http.get('/api/roles', { withCredentials: true })
+        .then(function(response) {
+            if (response.data.success) {
+                // Tu API devuelve 'data' en el JSON, lo cual es correcto
+                $scope.roles = response.data.data 
+            } else {
+                toast(response.data.message || 'Error al cargar roles', 3)
+            }
+        })
+        .catch(function(error) {
+            toast('Error de conexión al cargar roles: ' + (error.data?.message || error.statusText), 3)
+        })
+        .finally(function() {
+            $scope.loading = false
+        })
+    }
+    
+    // ========================================
+    // CREAR ROL (POST /api/roles)
+    // ========================================
+    $scope.addRole = function() {
+        if ($scope.isLoading) return
+        clearMessages()
+
+        if (!$scope.formRole.nombre || $scope.formRole.nombre.length > 50) {
+            $scope.errorMessage = 'El nombre del rol es requerido (máx 50 caracteres).'
+            return
+        }
+
+        $scope.isLoading = true
+        
+        let payload = {
+            nombre: $scope.formRole.nombre,
+            descripcion: $scope.formRole.descripcion
+        }
+
+        $http.post('/api/roles', payload, {
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(function(response) {
+            if (response.data && response.data.success) {
+                $scope.successMessage = response.data.message || `Rol '${payload.nombre}' creado.`
+                // Limpiar formulario y recargar lista
+                $scope.formRole = { nombre: '', descripcion: '' }
+                loadRoles(false)
+            } else {
+                $scope.errorMessage = response.data?.message || 'Error al crear rol. Intenta nuevamente.'
+            }
+        })
+        .catch(function(error) {
+            $scope.errorMessage = 'Error de conexión: ' + (error.data?.message || error.statusText || 'Error desconocido')
+        })
+        .finally(function() {
+            $scope.isLoading = false
+        })
+    }
+
+    // ========================================
+    // MODAL: INICIALIZACIÓN EDICIÓN
+    // ========================================
+    function initEditModal() {
+        const modalEl = document.getElementById('roleModal') 
+        if (modalEl) {
+            // Inicializar el modal de Bootstrap
+            roleModal = new bootstrap.Modal(modalEl)
+            
+            // Limpiar datos del formulario al cerrar el modal
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                $scope.$apply(function() {
+                    $scope.editingRole = null
+                    $scope.formRole = { nombre: '', descripcion: '' }
+                })
+            })
+        }
+    }
+
+    // ========================================
+    // MODAL: INICIALIZACIÓN ELIMINACIÓN
+    // ========================================
+    function initDeleteModal() {
+        const modalEl = document.getElementById('deleteRoleModal') 
+        if (modalEl) {
+            deleteModal = new bootstrap.Modal(modalEl)
+            
+            // Limpiar estado al cerrar el modal
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                $scope.$apply(function() {
+                    $scope.deletingRole = null
+                })
+            })
+        }
+    }
+    
+    $scope.showEditModal = function(role) {
+        clearMessages() // FIX: Limpiar mensajes de creación
+        $scope.editingRole = role
+        // Usar angular.copy para evitar modificar la fila de la tabla antes de guardar
+        $scope.formRole = angular.copy(role)
+        if (roleModal) roleModal.show()
+    }
+    
+    // ========================================
+    // GUARDAR ROL (PUT /api/roles/:id)
+    // ========================================
+    $scope.saveRole = function() {
+        if ($scope.saving) return
+
+        if (!$scope.formRole.nombre || $scope.formRole.nombre.length > 50) {
+            toast('El nombre del rol es requerido (máx 50 caracteres)', 3)
+            return
+        }
+
+        $scope.saving = true
+        let url = `/api/roles/${$scope.editingRole.id}` 
+
+        let payload = {
+            nombre: $scope.formRole.nombre,
+            descripcion: $scope.formRole.descripcion
+        }
+
+        $http.put(url, payload, {
+            withCredentials: true,
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(function(response) {
+            if (response.data && response.data.success) {
+                toast(response.data.message || 'Rol actualizado exitosamente', 2)
+                if (roleModal) roleModal.hide()
+                loadRoles(false)
+            } else {
+                toast(response.data?.message || 'Error al actualizar rol', 4)
+            }
+        })
+        .catch(function(error) {
+            toast('Error: ' + (error.data?.message || error.statusText || 'Error desconocido'), 5)
+        })
+        .finally(function() {
+            $scope.saving = false
+        })
+    }
+    
+    // ========================================
+    // ELIMINAR ROL (DELETE /api/roles/:id) - PASO 1: CONFIRMACIÓN
+    // ========================================
+    $scope.confirmDelete = function(role) {
+        // FIX: Reemplazando 'confirm' por un modal personalizado.
+        $scope.deletingRole = role
+        if (deleteModal) deleteModal.show()
+    }
+
+    // ========================================
+    // ELIMINAR ROL (DELETE /api/roles/:id) - PASO 2: EJECUCIÓN
+    // ========================================
+    $scope.deleteRoleConfirmed = function() {
+        if (!$scope.deletingRole || $scope.saving) return
+        
+        $scope.saving = true // Usamos 'saving' para el spinner
+        let roleToDelete = angular.copy($scope.deletingRole)
+
+        $http.delete(`/api/roles/${roleToDelete.id}`, { withCredentials: true })
+        .then(function(response) {
+            if (response.data.success) {
+                toast(response.data.message || `Rol ${roleToDelete.nombre} eliminado.`, 2)
+                if (deleteModal) deleteModal.hide()
+                loadRoles(false) // Recargar la lista
+            } else {
+                toast(response.data.message || 'Error al eliminar rol', 3)
+            }
+        })
+        .catch(function(error) {
+            toast('Error: ' + (error.data?.message || error.statusText), 3)
+        })
+        .finally(function() {
+            $scope.saving = false
+        })
+    }
+    
+    // ========================================
+    // INICIALIZACIÓN
+    // ========================================
+    initEditModal() // Inicializa el modal de edición
+    initDeleteModal() // Inicializa el modal de eliminación
+    loadRoles()
+    activeMenuOption("#/roles")
 })
 
 // ========================================
