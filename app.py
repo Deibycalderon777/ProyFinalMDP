@@ -1,14 +1,18 @@
-# app.py - COMPLETAMENTE LIMPIO
+# app.py - Configuración principal de Flask
 from flask import Flask, render_template
 from flask_cors import CORS
+# Asumo que usuario_routes.py existe o lo crearás.
 from routes.usuario_routes import usuario_bp
+from routes.roles_routes import role_bp  # Importación del Blueprint de Roles
 
 app = Flask(__name__)
 app.secret_key = 'utnc'  # Necesario para las sesiones
 CORS(app)
-# Registrar blueprint de usuario
-app.register_blueprint(usuario_bp)
 
+# Registrar blueprints
+# Nota: usuario_bp se asume ya definido en routes/usuario_routes.py
+app.register_blueprint(usuario_bp)
+app.register_blueprint(role_bp)  # Registro del Blueprint de Roles
 
 
 @app.route("/")
@@ -30,9 +34,12 @@ def users_fragment():
     """Plantilla parcial para la gestión de usuarios"""
     return render_template("users.html")
 
+@app.route('/roles')
+def roles_template():
+    """Sirve la plantilla HTML para la vista de gestión de roles."""
+    # Asegúrate de que 'roles.html' exista en tu carpeta 'templates'
+    return render_template('roles.html')
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-#usuario: admin@example.com
-# contraseña: Password123!
 
