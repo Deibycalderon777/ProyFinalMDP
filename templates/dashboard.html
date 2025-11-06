@@ -1,0 +1,172 @@
+<div class="container-fluid py-4">
+    <!-- Header con saludo y estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body p-4">
+                    <div ng-if="$root.currentUser">
+                        <h3 class="display-6">
+                            <i class="bi bi-person-circle me-2  "  ></i>
+                            Bienvenido, <strong ng-bind="$root.currentUser.username || $root.currentUser.nombre || 'Usuario'"></strong>
+                        </h3>
+                        <p class="lead mb-0 opacity-75 text-center">Panel de Control de Net Monitor</p>
+                    </div>
+                    <div ng-if="!$root.currentUser" class="text-center py-4">
+                        <h4><i class="bi bi-shield-lock me-2"></i>Acceso Restringido</h4>
+                        <p class="mb-3">Necesitas iniciar sesión para acceder al panel de control</p>
+                        <button class="btn btn-light btn-lg" ng-click="goToLogin()">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de acceso rápido 
+    <div class="row g-4">
+         Usuarios 
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-people fs-3 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">Gestión de Usuarios</h5>
+                            <p class="card-subtitle text-muted mb-0">Administra accesos y roles</p>
+                        </div>
+                    </div>
+                    <p class="card-text">Control completo sobre usuarios, permisos y roles del sistema.</p>
+                        <a href="#/users" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-person-gear me-2"></i>Gestionar Usuarios
+                        </a>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Estadísticas 
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-success bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-graph-up fs-3 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">Estadísticas</h5>
+                            <p class="card-subtitle text-muted mb-0">Métricas y análisis</p>
+                        </div>
+                    </div>
+                    <p class="card-text">Visualiza datos clave y tendencias de uso del sistema.</p>
+                    <button class="btn btn-outline-success w-100">
+                        <i class="bi bi-bar-chart me-2"></i>Ver Estadísticas
+                    </button>
+                </div>
+            </div>
+        </div>
+               -->
+        <!-- Ajustes
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-card">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-info bg-opacity-10 p-3 rounded-circle">
+                                <i class="bi bi-gear fs-3 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="card-title mb-1">Configuración</h5>
+                            <p class="card-subtitle text-muted mb-0">Personaliza el sistema</p>
+                        </div>
+                    </div>
+                    <p class="card-text">Ajusta las preferencias y configuración general.</p>
+                    <button class="btn btn-outline-info w-100">
+                        <i class="bi bi-sliders me-2"></i>Abrir Ajustes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div> 
+                        -->
+    <!-- Widgets adicionales -->
+    <div class="row g-4 mt-2">
+        <!-- Actividad Reciente 
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Actividad Reciente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-0 d-flex align-items-center py-3">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded-circle">
+                                    <i class="bi bi-person-check text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-0">Último acceso exitoso</p>
+                                <small class="text-muted">Hace 5 minutos</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                                                               -->
+        <!-- Estado del Sistema 
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Estado del Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">Servidor</h6>
+                            <small class="text-muted">Funcionando correctamente</small>
+                        </div>
+                        <span class="badge bg-success">Activo</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                                     -->
+
+    </div>
+</div>
+
+<!-- Estilos específicos para el dashboard -->
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+.card {
+    overflow: hidden;
+}
+.progress {
+    border-radius: 10px;
+}
+.list-group-item:hover {
+    background-color: var(--bs-light);
+}
+</style>

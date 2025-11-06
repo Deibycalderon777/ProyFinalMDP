@@ -1,0 +1,398 @@
+{% raw %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3>
+                        <i class="bi bi-people-fill me-2"></i>
+                        Gestión de Usuarios
+                    </h3>
+                    <p class="text-muted mb-0">
+                        <small>Total: <strong>{{users.length}}</strong> usuario(s)</small>
+                    </p>
+                </div>
+                <button class="btn btn-primary" ng-click="showCreateModal()">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Nuevo Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <!-- Búsqueda -->
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Buscar</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Nombre o email..." 
+                               ng-model="searchText">
+                    </div>
+                </div>
+
+                <!-- Filtro por Rol -->
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Rol</label>
+                    <select class="form-select" ng-model="filterRol">
+                        <option value="">Todos los roles</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Usuario</option>
+                    </select>
+                </div>
+
+                <!-- Filtro por Estado -->
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Estado</label>
+                    <select class="form-select" ng-model="filterActivo">
+                        <option value="">Todos los estados</option>
+                        <option value="true">Activos</option>
+                        <option value="false">Inactivos</option>
+                    </select>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100" 
+                            ng-click="applyFilters()">
+                        <i class="bi bi-funnel me-1"></i>
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón limpiar filtros -->
+            <div class="row mt-2" ng-show="searchText || filterRol || filterActivo">
+                <div class="col">
+                    <button class="btn btn-sm btn-outline-secondary" 
+                            ng-click="clearFilters()">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Limpiar filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <!-- Loading spinner -->
+            <div ng-if="loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <p class="mt-2 text-muted">Cargando usuarios...</p>
+            </div>
+
+            <!-- Tabla -->
+            <div class="table-responsive" ng-if="!loading">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <i class="bi bi-person me-1"></i>
+                                Nombre
+                            </th>
+                            <th>
+                                <i class="bi bi-envelope me-1"></i>
+                                Email
+                            </th>
+                            <th>
+                                <i class="bi bi-shield me-1"></i>
+                                Rol
+                            </th>
+                            <th>
+                                <i class="bi bi-toggle-on me-1"></i>
+                                Estado
+                            </th>
+                            <th>
+                                <i class="bi bi-calendar me-1"></i>
+                                Creado
+                            </th>
+                            <th class="text-center">
+                                <i class="bi bi-gear me-1"></i>
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="user in users">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2">
+                                        <i class="bi bi-person text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <strong>{{user.nombre}}</strong>
+                                        <br>
+                                        <small class="text-muted">ID: {{user.id}}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="bi bi-envelope-fill text-muted me-1"></i>
+                                {{user.email}}
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      ng-class="getRolBadge(user.rol_id).class">
+                                    <i class="bi bi-shield-fill me-1"></i>
+                                    {{getRolBadge(user.rol_id).text}}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      ng-class="getEstadoBadge(user.activo).class">
+                                    <i class="bi" 
+                                       ng-class="{'bi-check-circle-fill': user.activo, 'bi-x-circle-fill': !user.activo}">
+                                    </i>
+                                    {{getEstadoBadge(user.activo).text}}
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{user.created_at | date:'dd/MM/yyyy'}}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <!-- Editar -->
+                                    <button class="btn btn-outline-primary" 
+                                            ng-click="showEditModal(user)"
+                                            title="Editar usuario">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    
+                                    <!-- Activar/Desactivar -->
+                                    <button class="btn" 
+                                            ng-class="{'btn-outline-success': !user.activo, 'btn-outline-warning': user.activo}"
+                                            ng-click="toggleUserStatus(user)"
+                                            title="{{user.activo ? 'Desactivar' : 'Activar'}}">
+                                        <i class="bi" 
+                                           ng-class="{'bi-toggle-off': !user.activo, 'bi-toggle-on': user.activo}">
+                                        </i>
+                                    </button>
+                                    
+                                    <!-- Eliminar -->
+                                    <button class="btn btn-outline-danger" 
+                                            ng-click="confirmDelete(user)"
+                                            title="Eliminar usuario">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mensaje si no hay usuarios -->
+            <div ng-if="!loading && (!users || users.length === 0)" 
+                 class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <p class="mt-3 text-muted">No se encontraron usuarios</p>
+                <button class="btn btn-primary" ng-click="showCreateModal()">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Crear primer usuario
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear/editar usuario -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="bi" 
+                       ng-class="{'bi-person-plus-fill': !editingUser, 'bi-person-gear': editingUser}">
+                    </i>
+                    {{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form name="userForm" novalidate>
+                    <!-- Nombre -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-person me-1"></i>
+                            Nombre de Usuario
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               name="nombre"
+                               ng-model="formUser.nombre" 
+                               placeholder="Ej: juan123"
+                               required
+                               minlength="3"
+                               maxlength="50"
+                               pattern="^[a-zA-Z0-9_]+$">
+                        <small class="form-text text-muted">
+                            Solo letras, números y guiones bajos. Mínimo 3 caracteres.
+                        </small>
+                        <div class="text-danger" ng-show="userForm.nombre.$invalid && userForm.nombre.$touched">
+                            <small ng-show="userForm.nombre.$error.required">El nombre es requerido</small>
+                            <small ng-show="userForm.nombre.$error.minlength">Mínimo 3 caracteres</small>
+                            <small ng-show="userForm.nombre.$error.pattern">Solo letras, números y guiones bajos</small>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-envelope me-1"></i>
+                            Email
+                            <span class="text-danger">*</span>
+                        </label>
+                        <input type="email" 
+                               class="form-control" 
+                               name="email"
+                               ng-model="formUser.email" 
+                               placeholder="usuario@ejemplo.com"
+                               required>
+                        <div class="text-danger" ng-show="userForm.email.$invalid && userForm.email.$touched">
+                            <small ng-show="userForm.email.$error.required">El email es requerido</small>
+                            <small ng-show="userForm.email.$error.email">Formato de email inválido</small>
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-key me-1"></i>
+                            Contraseña
+                            <span class="text-danger" ng-if="!editingUser">*</span>
+                            <small class="text-muted" ng-if="editingUser">(dejar en blanco para mantener)</small>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               name="password"
+                               ng-model="formUser.password"
+                               placeholder="••••••••"
+                               ng-required="!editingUser"
+                               minlength="6">
+                        <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                        <div class="text-danger" ng-show="userForm.password.$invalid && userForm.password.$touched">
+                            <small ng-show="userForm.password.$error.required">La contraseña es requerida</small>
+                            <small ng-show="userForm.password.$error.minlength">Mínimo 6 caracteres</small>
+                        </div>
+                    </div>
+
+                    <!-- Rol -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-shield me-1"></i>
+                            Rol
+                            <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" 
+                                name="rol_id"
+                                ng-model="formUser.rol_id" 
+                                required>
+                            <option value="">Seleccionar rol...</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Usuario</option>
+                        </select>
+                        <small class="form-text text-muted">
+                            <strong>Admin:</strong> Acceso total | 
+                            <strong>Usuario:</strong> Acceso limitado
+                        </small>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   name="activo"
+                                   id="switchActivo"
+                                   ng-model="formUser.activo">
+                            <label class="form-check-label" for="switchActivo">
+                                <i class="bi" 
+                                   ng-class="{'bi-check-circle-fill text-success': formUser.activo, 
+                                            'bi-x-circle-fill text-danger': !formUser.activo}">
+                                </i>
+                                Usuario {{formUser.activo ? 'Activo' : 'Inactivo'}}
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Los usuarios inactivos no pueden iniciar sesión
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>
+                    Cancelar
+                </button>
+                <button type="button" 
+                        class="btn btn-primary" 
+                        ng-click="saveUser()" 
+                        ng-disabled="userForm.$invalid || saving">
+                    <span ng-if="!saving">
+                        <i class="bi" 
+                           ng-class="{'bi-person-plus-fill': !editingUser, 
+                                    'bi-check-circle-fill': editingUser}">
+                        </i>
+                        {{ editingUser ? 'Guardar Cambios' : 'Crear Usuario' }}
+                    </span>
+                    <span ng-if="saving">
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                        Guardando...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos adicionales -->
+<style>
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.modal-header {
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.badge {
+    font-size: 0.85em;
+    padding: 0.4em 0.6em;
+}
+
+.card {
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+</style>
+{% endraw %}
