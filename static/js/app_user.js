@@ -20,14 +20,17 @@ app.config(function ($routeProvider, $locationProvider) {
     $locationProvider.hashPrefix("")
 
     $routeProvider
-    .when("/", {
-        templateUrl: "/dashboard",
-        controller: "dashboardCtrl"
-    })
+
     .when("/login", {
         templateUrl: "/login",
         controller: "loginCtrl"
     })
+        
+    .when("/", {
+        templateUrl: "/dashboard",
+        controller: "dashboardCtrl"
+    })
+  
     .when("/users", {
         templateUrl: "/users",
         controller: "usersCtrl"
