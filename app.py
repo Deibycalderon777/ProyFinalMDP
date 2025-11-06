@@ -22,7 +22,6 @@ def dashboard():
 
 @app.route("/dashboard")
 def dashboard_fragment():
-    # Plantilla parcial que se carga dentro de inicio.html (ng-view)
     return render_template("dashboard.html")
 
 @app.route("/login")
@@ -31,14 +30,15 @@ def app_view():
 
 @app.route("/users")
 def users_fragment():
-    """Plantilla parcial para la gestión de usuarios"""
     return render_template("users.html")
 
 @app.route('/roles')
 def roles_template():
-    """Sirve la plantilla HTML para la vista de gestión de roles."""
-    # Asegúrate de que 'roles.html' exista en tu carpeta 'templates'
     return render_template('roles.html')
+
+@app.route('/dispositivos')
+def dispositivos_template():
+    return render_template('dispositivos.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
