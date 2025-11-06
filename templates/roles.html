@@ -1,0 +1,126 @@
+
+
+{% raw %}
+<div class="card shadow-lg mb-5 rounded-3 border-0">
+    <div class="card-header bg-light border-bottom-0 pt-4">
+        <h5 class="mb-0 text-dark">Crear Nuevo Rol</h5>
+    </div>
+    <div class="card-body">
+        <!-- Mensajes de Estado del Formulario de Creación -->
+        <div ng-if="successMessage" class="alert alert-success d-flex align-items-center rounded-pill p-2 px-3 mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
+        </div>
+        <div ng-if="errorMessage" class="alert alert-danger d-flex align-items-center rounded-pill p-2 px-3 mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+        </div>
+
+        <form ng-submit="addRole()">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="roleName" class="form-label fw-medium">Nombre del Rol (máx 50)</label>
+                    <input type="text" id="roleName" class="form-control rounded-3" ng-model="formRole.nombre" required maxlength="50" placeholder="Ej: Administrador, Editor">
+                </div>
+                <div class="col-md-6">
+                    <label for="roleDesc" class="form-label fw-medium">Descripción</label>
+                    <input type="text" id="roleDesc" class="form-control rounded-3" ng-model="formRole.descripcion" placeholder="Descripción breve de las capacidades">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 rounded-3 shadow-sm" ng-disabled="isLoading">
+                        <span ng-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span ng-if="!isLoading">Guardar Rol</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Listado de Roles -->
+<div class="card shadow-lg rounded-3 border-0">
+    <div class="card-header bg-primary text-white rounded-top-3">
+        <h4 class="mb-0">Roles Existentes ({{ roles.length }})</h4>
+    </div>
+    <div class="card-body p-0">
+        <!-- Loader -->
+        <div ng-if="loading" class="text-center p-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando roles...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando roles del servidor...</p>
+        </div>
+
+        <!-- Tabla de Roles -->
+        <div ng-if="!loading">
+            <div ng-if="roles.length === 0" class="text-center p-5">
+                <p class="lead text-muted">No se encontraron roles en el sistema.</p>
+            </div>
+            
+            <div ng-if="roles.length > 0" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="text-center">ID</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="role in roles | orderBy:'id'">
+                            <td class="text-center text-muted fw-bold">{{ role.id }}</td>
+                            <td><span class="badge bg-dark rounded-pill">{{ role.nombre }}</span></td>
+                            <td class="text-wrap text-muted">{{ role.descripcion || 'Sin descripción' }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-info text-white me-2 rounded-pill" ng-click="showEditModal(role)" title="Editar Rol">
+                                    <i class="bi bi-pencil-fill"></i> Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger rounded-pill" ng-click="confirmDelete(role)" title="Eliminar Rol">
+                                    <i class="bi bi-trash-fill"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Rol -->
+<div class="modal fade" id="roleModal" tabindex="-1" aria-labelledby="roleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 shadow-lg">
+            <div class="modal-header bg-info text-white rounded-top-4">
+                <h5 class="modal-title" id="roleModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i> 
+                    Editar Rol: {{ editingRole.nombre }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form ng-submit="saveRole()">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="editRoleName" class="form-label fw-medium">ID del Rol:</label>
+                        <input type="text" class="form-control rounded-3" value="{{ editingRole.id }}" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoleName" class="form-label fw-medium">Nombre</label>
+                        <input type="text" id="editRoleName" class="form-control rounded-3" ng-model="formRole.nombre" required maxlength="50" placeholder="Nombre del Rol">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoleDesc" class="form-label fw-medium">Descripción</label>
+                        <textarea id="editRoleDesc" class="form-control rounded-3" ng-model="formRole.descripcion" rows="3" placeholder="Descripción breve del rol"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer p-3 bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success rounded-pill" ng-disabled="saving">
+                        <span ng-if="saving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endraw %}

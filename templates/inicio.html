@@ -80,39 +80,50 @@
     <div class="container-fluid">
         <div class="row align-items-center py-2 border-bottom">
             <div class="col">
-                <h5 class="mb-0"> NetMonitor </h5>
+          
+
+           
+
+                <h5 class="bi bi-display mb-0 text-center text-primary" >  Bienvenido a NetMonitor </h5>
             </div>
             
-        </div>
+        </div> 
     </div>
     
-    <ul class="app-menu nav nav-underline justify-content-center align-items-center">
+ <div class="d-flex align-items-center justify-content-between w-100">
+    <ul class="app-menu nav nav-underline justify-content-center align-items-center text-success m-0 flex-grow-1">
         
         <li class="nav-item" ng-hide="$root.currentUser">
-            <a class="nav-link" href="#/">Inicio de Sesion</a>
+            <a class="nav-link" href="#/">Inicio de Sesión</a>
         </li>
         
         <li class="nav-item" ng-show="$root.currentUser">
-            <a class="nav-link" href="#/dashboard">Dashboard</a> 
+            <a class="bi bi-house nav-link" href="#/dashboard"> Dashboard</a>
         </li>
+        
         <li class="nav-item" ng-show="$root.currentUser">
-            <a class="nav-link" href="#/users">Usuarios</a> </li>
-
-        <li class="nav-item ms-3" ng-show="$root.currentUser">
-            <div class="d-flex align-items-center gap-2">
-                <span class="user-welcome text-muted small">
-                    <i class="bi bi-person-circle"></i>
-                    <strong ng-bind="$root.currentUser.username || 'Usuario'"></strong>
-                </span>
-
-                <button class="btn btn-sm btn-outline-danger" 
-                        ng-click="$root.logout()"
-                        title="Cerrar sesión">
-                    <i class="bi bi-box-arrow-right"></i> Salir
-                </button>
-            </div>
+            <a class="bi bi-people-fill nav-link" href="#/users"> Usuarios</a>
         </li>
+        
+        <li class="nav-item" ng-show="$root.currentUser">
+            <a class="bi bi-person-badge-fill nav-link" href="#/roles"> Roles</a>
+        </li>
+        
     </ul>
+
+    <div class="d-flex align-items-center gap-2" ng-show="$root.currentUser">
+        <span class="user-welcome text-muted small">
+            <i class="bi bi-person-workspace text-success"></i>
+            <strong class="text-success" ng-bind="$root.currentUser.email || 'Usuario'"></strong>
+        </span>
+        <button class="btn btn-sm btn-outline-danger" 
+                ng-click="$root.logout()"
+                title="Cerrar sesión">
+            <i class="bi bi-box-arrow-right"></i> Salir
+        </button>
+    </div>
+</div>
+
     
     <div id="appContent" class="app-content container p-3 {{ '{{ slide }}' }}" ng-view></div>  
 
