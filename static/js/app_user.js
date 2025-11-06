@@ -32,6 +32,12 @@ app.config(function ($routeProvider, $locationProvider) {
         templateUrl: '/roles', 
         controller: 'rolesCtrl' 
     })
+     .when('/dispositivos', {
+        templateUrl: '/dispositivos', 
+        controller: 'dispositivosCtrl' 
+    })
+
+        
     .otherwise({
         redirectTo: "/"
     })
@@ -663,6 +669,13 @@ app.controller("rolesCtrl", function ($scope, $http, $rootScope, $timeout) {
     loadRoles()
     activeMenuOption("#/roles")
 })
+
+app.controller("dispositivosCtrl", function ($scope, $http, $rootScope, $location) {
+  
+})
+
+
+
 
 // ========================================
 // CONTROLLER: DASHBOARD
